@@ -1,0 +1,23 @@
+# Binaries and executables
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+bin/
+
+# Test binaries and coverage reports
+*.test
+*.out
+
+# Environment secrets
+.env
+.env.*
+
+# Tooling/IDE
+.vscode/
+.idea/
+*.swp
+
+# OS files
+.DS_Store
