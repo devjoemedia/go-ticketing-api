@@ -21,10 +21,11 @@ type GetUserResponse struct {
 }
 
 type UpdateUserResponse struct {
-	Success bool         `json:"success"`
-	Status  int          `json:"status"`
-	Message string       `json:"message"`
-	User    *models.User `json:"user"`
+	Success    bool             `json:"success"`
+	Status     int              `json:"status"`
+	Message    string           `json:"message"`
+	User       *models.User     `json:"user"`
+	Pagination types.Pagination `json:"pagination"`
 }
 
 type DeleteUserResponse struct {

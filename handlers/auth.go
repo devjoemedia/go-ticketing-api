@@ -14,9 +14,9 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var validate = validator.New() // package-level; reuse across handlers
+var validate = validator.New()
 
-// ─── Register ─────────────────────────────────────────────
+// Register
 
 // Register godoc
 // @Summary      Register a new user
@@ -76,7 +76,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// ─── Login ────────────────────────────────────────────────
+// Login
 
 // Login godoc
 // @Summary      Login
@@ -124,7 +124,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// ─── Refresh ──────────────────────────────────────────────
+// Refresh
 
 // RefreshToken godoc
 // @Summary      Refresh access token
@@ -150,7 +150,7 @@ func RefreshToken(w http.ResponseWriter, r *http.Request) {
 
 	// Lookup the DB record by the UUID embedded in the JWT
 	var stored models.RefreshToken
-	if err := database.DB.Where("token = ?", claims.TokenID).First(&stored).Error; err != nil {
+	if lookup_error := database.DB.Where("token = ?", claims.TokenID).First(&stored).Error; lookup_error != nil {
 		utils.Error(w, http.StatusUnauthorized, "Refresh token not found")
 		return
 	}
@@ -161,12 +161,12 @@ func RefreshToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// ── Rotation: revoke old, issue new pair ─────────────
+	// Rotation: revoke old, issue new pair
 	stored.Revoked = true
 	database.DB.Save(&stored)
 
 	var user models.User
-	if err := database.DB.First(&user, claims.UserID).Error; err != nil {
+	if error := database.DB.First(&user, claims.UserID).Error; error != nil {
 		utils.Error(w, http.StatusUnauthorized, "User not found")
 		return
 	}
@@ -185,7 +185,7 @@ func RefreshToken(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// ─── Logout ───────────────────────────────────────────────
+// Logout
 
 // Logout godoc
 // @Summary      Logout (revoke refresh token)
@@ -222,12 +222,12 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// ─── Private helper ───────────────────────────────────────
+// Private helper
 
 // issueTokenPair creates a DB-persisted refresh token and returns
 // both a signed access JWT and a signed refresh JWT.
 func issueTokenPair(r *http.Request, user *models.User) (api_response.AuthTokens, error) {
-	tokenID := uuid.NewString() // unique ID stored in DB + embedded in JWT
+	tokenID := uuid.NewString()
 
 	expiry := utils.RefreshExpiry()
 	rt := models.RefreshToken{

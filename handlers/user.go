@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/devjoemedia/chitodopostgress/database"
 	"github.com/devjoemedia/chitodopostgress/models"
@@ -9,6 +10,7 @@ import (
 	api_response "github.com/devjoemedia/chitodopostgress/types/response"
 	"github.com/devjoemedia/chitodopostgress/utils"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-playground/validator/v10"
 )
 
 // GetUsers godoc
@@ -72,6 +74,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 // @Tags         users
 // @Accept       json
 // @Produce      json
+// @Security BearerAuth
 // @Param        id     path    int  true  "User ID"
 // @Param        body   body    models.UpdateUserRequest  true  "User object"
 // @Success      200    {object} api_response.UpdateUserResponse
@@ -80,14 +83,42 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 // @Router       /api/v1/users/{id} [put]
 // @Router       /api/v1/users/{id} [patch]
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
-	var user models.User
-	if result := database.DB.First(&user, id); result.Error != nil {
-		http.Error(w, "User not found", http.StatusNotFound)
+	idStr := chi.URLParam(r, "id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		utils.Error(w, http.StatusBadRequest, "Invalid todo ID")
 		return
 	}
 
-	utils.JSON(w, http.StatusOK, api_response.GetUserResponse{
+	var input models.UpdateUserRequest
+	if err := utils.ReadRequestBody(w, r, &input); err != nil {
+		utils.Error(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// Validation
+	validate := validator.New()
+	if err := validate.Struct(&input); err != nil {
+		utils.Error(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	ctx := r.Context()
+	var user models.User
+	if err := database.DB.WithContext(ctx).First(&user, id); err != nil {
+		utils.Error(w, http.StatusNotFound, "User not found")
+		return
+	}
+
+	// Updating fields
+	user.Name = input.Name
+
+	if err := database.DB.WithContext(ctx).Save(&user); err.Error != nil {
+		utils.Error(w, http.StatusNotFound, "failed to update user")
+		return
+	}
+
+	utils.JSON(w, http.StatusOK, api_response.UpdateUserResponse{
 		Success: true,
 		Status:  http.StatusOK,
 		Message: "User retrieved successfully",

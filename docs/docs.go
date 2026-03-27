@@ -491,6 +491,62 @@ const docTemplate = `{
                     }
                 }
             },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update a user item by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Update an existing user",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "User object",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api_response.UpdateUserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid JSON",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
             "delete": {
                 "security": [
                     {
@@ -523,6 +579,62 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Invalid ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update a user item by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Update an existing user",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "User object",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/api_response.UpdateUserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid JSON",
                         "schema": {
                             "type": "string"
                         }
@@ -770,6 +882,23 @@ const docTemplate = `{
                 }
             }
         },
+        "api_response.UpdateUserResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "user": {
+                    "$ref": "#/definitions/models.User"
+                }
+            }
+        },
         "models.LoginRequest": {
             "type": "object",
             "required": [
@@ -855,6 +984,19 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "title": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 1
+                }
+            }
+        },
+        "models.UpdateUserRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
                     "type": "string",
                     "maxLength": 255,
                     "minLength": 1

@@ -2,15 +2,13 @@ package utils
 
 import (
 	"errors"
-	"os"
-	"strconv"
 	"time"
 
+	"github.com/devjoemedia/chitodopostgress/config"
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// ─── Custom Claims ────────────────────────────────────────
-
+// Custom Claims
 type AccessClaims struct {
 	UserID uint   `json:"user_id"`
 	Email  string `json:"email"`
@@ -19,17 +17,18 @@ type AccessClaims struct {
 
 type RefreshClaims struct {
 	UserID  uint   `json:"user_id"`
-	TokenID string `json:"token_id"` // maps to RefreshToken.Token (UUID)
+	TokenID string `json:"token_id"`
 	jwt.RegisteredClaims
 }
 
-// ─── Helpers ──────────────────────────────────────────────
-
-func accessSecret() []byte  { return []byte(os.Getenv("JWT_ACCESS_SECRET")) }
-func refreshSecret() []byte { return []byte(os.Getenv("JWT_REFRESH_SECRET")) }
+// Helpers
+func accessSecret() []byte     { return []byte(config.AppConfig.JWTAccessSecret) }
+func refreshSecret() []byte    { return []byte(config.AppConfig.JWTRefreshSecret) }
+func accessExpiryMinutes() int { return int(config.AppConfig.JWTAccessExpiryMinutes) }
+func refreshExpiryDays() int   { return int(config.AppConfig.JWTRefreshExpiryDays) }
 
 func accessExpiry() time.Duration {
-	mins, _ := strconv.Atoi(os.Getenv("JWT_ACCESS_EXPIRY_MINUTES"))
+	mins := accessExpiryMinutes()
 	if mins == 0 {
 		mins = 15
 	}
@@ -37,15 +36,14 @@ func accessExpiry() time.Duration {
 }
 
 func refreshExpiry() time.Duration {
-	days, _ := strconv.Atoi(os.Getenv("JWT_REFRESH_EXPIRY_DAYS"))
+	days := refreshExpiryDays()
 	if days == 0 {
 		days = 7
 	}
 	return time.Duration(days) * 24 * time.Hour
 }
 
-// ─── Token Generation ─────────────────────────────────────
-
+// Token Generation
 func GenerateAccessToken(userID uint, email string) (string, error) {
 	claims := AccessClaims{
 		UserID: userID,
@@ -74,8 +72,7 @@ func GenerateRefreshToken(userID uint, tokenID string) (string, error) {
 		SignedString(refreshSecret())
 }
 
-// ─── Token Parsing ────────────────────────────────────────
-
+// Token Parsing
 var (
 	ErrInvalidToken = errors.New("invalid token")
 	ErrExpiredToken = errors.New("token has expired")

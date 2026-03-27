@@ -38,6 +38,7 @@ func main() {
 	))
 	r.Mount("/api/v1/auth", routes.AuthRoute())
 	r.Mount("/api/v1/todos", routes.TodoRoute())
+	r.Mount("/api/v1/tickets", routes.TicketRoute())
 
 	// Protected routes — middleware applied at mount point
 	r.Group(func(r chi.Router) {
@@ -47,6 +48,7 @@ func main() {
 
 	port := ":" + config.AppConfig.AppPort
 	fmt.Printf("🚀 Server running on port %s\n", port)
+	fmt.Println("📚 Docs:: http://localhost:8000/swagger/index.html")
 
 	// This line blocks the program from exiting
 	if err := http.ListenAndServe(port, r); err != nil {

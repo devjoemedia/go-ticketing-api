@@ -29,9 +29,3 @@ type Todo struct {
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
-
-type PaginatedTodos struct {
-	Data  []Todo `json:"data"`
-	Total int    `json:"total"`
-	Page  int    `json:"page"`
-}

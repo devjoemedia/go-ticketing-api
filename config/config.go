@@ -61,7 +61,7 @@ func Load() {
 	}
 }
 
-// ─── Helpers ──────────────────────────────────────────────
+// Helpers
 
 // getEnv returns the value or a fallback default.
 func getEnv(key, defaultVal string) string {
